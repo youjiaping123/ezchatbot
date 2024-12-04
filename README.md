@@ -1,133 +1,128 @@
-# AI 智能助手
+# EzChatBot - 树莓派语音聊天机器人
 
-这是一个基于 OpenAI API 的智能对话助手，支持文本和语音交互。
-
-## 功能特点
-
-- 💬 支持文本对话
-- 🎤 支持语音输入（Speech-to-Text）
-- 🔊 支持语音输出（Text-to-Speech）
-- 💾 自动保存对话历史
-- ⚙️ 可配置的模型参数
-- 🌐 支持中文交互
+这是一个基于OpenAI API和Azure语音服务的智能语音聊天机器人，专门为树莓派设计。
 
 ## 系统要求
 
-- Python 3.8+
-- 麦克风（用于语音输入）
-- 音频输出设备（用于语音播放）
-- OpenAI API 密钥
-- Azure 语音服务密钥
+- Raspberry Pi (推荐使用Raspberry Pi 4或更新版本)
+- Raspberry Pi OS (基于Debian Bullseye或更新版本)
+- Python 3.7+
+- 麦克风
+- 音箱或耳机
+- 网络连接
+
+## 硬件设置
+
+1. 将麦克风连接到树莓派的USB端口或3.5mm音频接口
+2. 将音箱或耳机连接到树莓派的音频输出接口
 
 ## 安装步骤
 
-1. 安装必要的Python包：
+1. 首先更新系统包：
 ```bash
-pip install openai python-dotenv azure-cognitiveservices-speech
+sudo apt update
+sudo apt upgrade
 ```
 
-2. 配置环境变量：
-   创建 `.env` 文件并填入以下内容：
+2. 安装必要的系统依赖：
 ```bash
-OPENAI_API_KEY=你的OpenAI_API密钥
-OPENAI_API_BASE=你的API基础URL
+sudo apt install -y python3-pip python3-venv portaudio19-dev python3-pyaudio
+```
+
+3. 克隆项目仓库：
+```bash
+git clone [你的仓库地址]
+cd ezchatbot
+```
+
+4. 创建并激活虚拟环境：
+```bash
+python3 -m venv venv
+source venv/bin/activate
+```
+
+5. 安装Python依赖：
+```bash
+pip install -r requirements.txt
+```
+
+6. 创建配置文件：
+```bash
+cp .env.example .env
+```
+
+7. 编辑.env文件，填入你的API密钥：
+```
+OPENAI_API_KEY=你的OpenAI API密钥
+OPENAI_API_BASE=https://api.openai.com/v1
 SPEECH_KEY=你的Azure语音服务密钥
 SPEECH_REGION=你的Azure语音服务区域
 ```
 
-## 详细使用教程
+## 音频设置
 
-### 1. 基础文本对话
-1. 启动程序：
+1. 检查音频设备：
+```bash
+arecord -l  # 列出录音设备
+aplay -l    # 列出播放设备
+```
+
+2. 测试麦克风：
+```bash
+arecord -d 5 test.wav  # 录制5秒音频
+aplay test.wav         # 播放录制的音频
+```
+
+## 运行程序
+
+1. 确保在虚拟环境中：
+```bash
+source venv/bin/activate
+```
+
+2. 运行聊天机器人：
 ```bash
 python chat_bot.py
 ```
 
-2. 直接输入文本进行对话：
-```
-你: 你好
-AI助手: 你好！有什么我可以帮你的吗？
-```
+## 使用说明
 
-### 2. 语音交互
-1. 切换到语音模式：
-```
-你: voice
-已切换到语音输入模式
-```
+- 启动程序后，默认使用文本输入模式
+- 输入 'voice' 切换到语音输入模式
+- 输入 'text' 切换回文本输入模式
+- 输入 'quit' 或 'exit' 退出程序
+- 在语音模式下，说话后会自动识别并回复
+- 机器人的回复在语音模式下会自动播放
 
-2. 开始说话（等待提示音后）：
-```
-请说话...
-你: [语音输入] 今天天气怎么样？
-AI助手: [语音回复] 我是AI助手，无法直接获取天气信息...
-```
+## 故障排除
 
-3. 返回文本模式：
-```
-你: text
-已切换回文本输入模式
+1. 如果遇到麦克风问题：
+```bash
+# 检查麦克风权限
+sudo usermod -a -G audio $USER
+# 重启树莓派
+sudo reboot
 ```
 
-### 3. 高级功能
-
-#### 配置文件使用
-可以通过修改 `bot_config.json` 自定义机器人行为：
-
-```json
-{
-    "name": "AI助手",
-    "lang": "cn",
-    "modelConfig": {
-        "temperature": 0.7,    // 更高的值使回答更有创意
-        "historyMessageCount": 4,  // 记忆的对话轮数
-        "max_tokens": 2000     // 回复的最大长度
-    }
-}
+2. 如果遇到声音输出问题：
+```bash
+# 运行音频配置工具
+sudo raspi-config
+# 选择 System Options -> Audio -> 选择合适的音频输出
 ```
 
-#### 常用命令
-- `voice`: 切换到语音模式
-- `text`: 切换到文本模式
-- `quit` 或 `exit`: 结束对话
-- Ctrl+C: 强制退出程序
+3. 如果遇到依赖安装问题：
+```bash
+# 确保pip是最新版本
+pip install --upgrade pip
+# 手动安装特定依赖
+pip install azure-cognitiveservices-speech
+```
 
-### 4. 使用技巧
+## 注意事项
 
-1. 对话上下文
-- 机器人会记住对话历史
-- 可以参考之前的对话内容
-- 历史记录会自动保存
+- 确保树莓派有稳定的网络连接
+- 使用优质的麦克风可以提高语音识别准确率
+- 定期检查API密钥的有效性和使用配额
+- 建议在安静的环境中使用语音功能
 
-2. 语音交互建议
-- 在安静的环境中使用
-- 说话清晰，语速适中
-- 等待提示音后再说话
-
-3. 性能优化
-- 适当调整历史消息数量
-- 根据需求调整temperature值
-- 合理设置max_tokens
-
-## 常见问题解答
-
-### 1. 语音识别问题
-Q: 为什么语音识别没有反应？
-A: 检查：
-- 麦克风是否正常工作
-- 是否授予了麦克风权限
-- Azure语音服务配置是否正确
-
-### 2. API相关问题
-Q: 出现API错误怎么办？
-A: 检查：
-- API密钥是否正确
-- 网络连接是否正常
-- API额度是否充足
-
-### 3. 配置问题
-Q: 修改配置后不生效？
-A: 确保：
-- 正确保存了配置文件
-- 配置文件格式正确
-- 重启程序使配置生效
